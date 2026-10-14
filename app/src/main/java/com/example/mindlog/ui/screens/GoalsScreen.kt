@@ -14,17 +14,22 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mindlog.viewmodel.GoalViewModel
 
+/**
+ * Экран целей. Список целей + кнопка «+ Новая цель».
+ * У каждой цели есть чек-бокс, чтобы отметить её выполненной.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
 
+    // Состояние списка из ViewModel.
     val goals by viewModel.goals.collectAsState()
+
+    // Локальное состояние для показа диалога добавления.
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Цели") })
-        }
+        topBar = { TopAppBar(title = { Text("Цели") }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -33,11 +38,14 @@ fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
                 .padding(16.dp)
         ) {
             if (goals.isEmpty()) {
+                // Если целей нет — показываем подсказку.
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Целей пока нет. Добавьте первую!", style = MaterialTheme.typography.bodyLarge)
+                    Text("Целей пока нет. Добавьте первую!")
                 }
             } else {
                 LazyColumn(
@@ -55,22 +63,17 @@ fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
                                     .padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Чек-бокс выполнения. При нажатии меняется состояние цели.
                                 Checkbox(
                                     checked = goal.isCompleted,
                                     onCheckedChange = { viewModel.toggleGoal(goal) }
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        goal.title,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
+                                    Text(goal.title, fontWeight = FontWeight.Bold)
                                     Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        "Дедлайн: ${goal.deadline}",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
+                                    Text("Дедлайн: ${goal.deadline}")
                                 }
+                                // Кнопка удаления цели.
                                 IconButton(onClick = { viewModel.deleteGoal(goal) }) {
                                     Icon(Icons.Filled.Delete, contentDescription = "Удалить")
                                 }
@@ -81,7 +84,6 @@ fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
             }
 
             Spacer(Modifier.height(8.dp))
-
             Button(
                 onClick = { showDialog = true },
                 modifier = Modifier.fillMaxWidth()
@@ -90,6 +92,7 @@ fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
             }
         }
 
+        // Диалог добавления новой цели.
         if (showDialog) {
             AddGoalDialog(
                 onDismiss = { showDialog = false },
@@ -102,11 +105,16 @@ fun GoalsScreen(viewModel: GoalViewModel = viewModel()) {
     }
 }
 
+/**
+ * Диалоговое окно для создания новой цели.
+ * Просит название и дедлайн.
+ */
 @Composable
 fun AddGoalDialog(
     onDismiss: () -> Unit,
     onSave: (String, String) -> Unit
 ) {
+    // Локальные состояния для полей ввода.
     var title by remember { mutableStateOf("") }
     var deadline by remember { mutableStateOf("") }
 
@@ -133,6 +141,7 @@ fun AddGoalDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    // Сохраняем только если оба поля заполнены.
                     if (title.isNotBlank() && deadline.isNotBlank()) {
                         onSave(title, deadline)
                     }

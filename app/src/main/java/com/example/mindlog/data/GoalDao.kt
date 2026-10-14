@@ -21,6 +21,7 @@ interface GoalDao {
     @Query("SELECT * FROM goals ORDER BY id DESC")
     suspend fun getAllGoals(): List<GoalEntity>
 
+    // Используется для проверки достижений.
     @Query("SELECT COUNT(*) FROM goals WHERE isCompleted = 1")
     suspend fun getCompletedGoalsCount(): Int
 }

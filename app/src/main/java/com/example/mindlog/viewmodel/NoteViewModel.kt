@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel для экрана заметок.
+ * Хранит список заметок в StateFlow — UI сам подписывается и обновляется.
+ */
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: NoteRepository
@@ -29,21 +33,15 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Создание новой заметки
     fun addNote(title: String, content: String, checklist: String) {
         viewModelScope.launch {
             repository.insert(
-                NoteEntity(
-                    title = title,
-                    content = content,
-                    checklist = checklist
-                )
+                NoteEntity(title = title, content = content, checklist = checklist)
             )
             loadNotes()
         }
     }
 
-    
     fun updateNote(note: NoteEntity) {
         viewModelScope.launch {
             repository.update(note)
@@ -51,7 +49,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Получение заметки по id (для экрана редактирования)
+    // suspend, потому что вызывается из LaunchedEffect на экране редактирования.
     suspend fun getNoteById(id: Int): NoteEntity? {
         return repository.getNoteById(id)
     }

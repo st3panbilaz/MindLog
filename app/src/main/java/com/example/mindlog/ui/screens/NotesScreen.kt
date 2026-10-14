@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mindlog.viewmodel.NoteViewModel
 
+/**
+ * Экран списка заметок. Показываем только заголовки.
+ * Свайп влево/вправо — удалить. Клик — открыть редактирование.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
@@ -48,6 +52,7 @@ fun NotesScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(notes, key = { it.id }) { note ->
+                        // Состояние свайпа для каждой карточки своё.
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value == SwipeToDismissBoxValue.EndToStart ||
@@ -62,11 +67,9 @@ fun NotesScreen(
                         SwipeToDismissBox(
                             state = dismissState,
                             backgroundContent = {
-                                val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFE53935)
-                                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFFE53935)
-                                    else -> Color.Transparent
-                                }
+                                // Красный фон с корзиной при свайпе.
+                                val color = if (dismissState.dismissDirection != SwipeToDismissBoxValue.Settled)
+                                    Color(0xFFE53935) else Color.Transparent
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -78,11 +81,7 @@ fun NotesScreen(
                                         else -> Alignment.Center
                                     }
                                 ) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = "Удалить",
-                                        tint = Color.White
-                                    )
+                                    Icon(Icons.Filled.Delete, contentDescription = "Удалить", tint = Color.White)
                                 }
                             },
                             enableDismissFromStartToEnd = true,

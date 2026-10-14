@@ -17,6 +17,7 @@ interface AchievementDao {
     @Query("SELECT * FROM achievements ORDER BY id")
     suspend fun getAllAchievements(): List<AchievementEntity>
 
+    // Счётчики для проверки условий разблокировки.
     @Query("SELECT COUNT(*) FROM goals WHERE isCompleted = 1")
     suspend fun getCompletedGoalsCount(): Int
 

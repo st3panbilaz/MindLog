@@ -5,6 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+/**
+ * Главный класс базы данных. Связывает сущности и DAO.
+ * Синглтон — создаётся один раз при первом обращении.
+ */
 @Database(
     entities = [
         NoteEntity::class,
@@ -33,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "mindlog_database"
                 )
+                    // Чтобы не писать миграции на этапе разработки.
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

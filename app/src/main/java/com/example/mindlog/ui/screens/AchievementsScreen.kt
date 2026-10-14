@@ -13,23 +13,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mindlog.viewmodel.AchievementViewModel
 
+/**
+ * Экран достижений. Показывает список из 6 достижений:
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchievementsScreen(viewModel: AchievementViewModel = viewModel()) {
 
+    // Подписываемся на StateFlow из ViewModel — при изменении список сам обновится.
     val achievements by viewModel.achievements.collectAsState()
 
-    // Перепроверяем достижения при входе на экран
+    // Каждый раз при входе на экран перепроверяем условия разблокировки.
+    // LaunchedEffect(Unit) срабатывает один раз при появлении экрана.
     LaunchedEffect(Unit) {
         viewModel.checkAchievements()
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Достижения") })
-        }
+        topBar = { TopAppBar(title = { Text("Достижения") }) }
     ) { padding ->
         if (achievements.isEmpty()) {
+            // Пока база инициализируется — показываем заглушку.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -46,12 +50,13 @@ fun AchievementsScreen(viewModel: AchievementViewModel = viewModel()) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(achievements) { achievement ->
+                items(achievements) { a ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        // Цвет карточки зависит от статуса: получено или нет.
                         colors = CardDefaults.cardColors(
-                            containerColor = if (achievement.isUnlocked)
+                            containerColor = if (a.isUnlocked)
                                 MaterialTheme.colorScheme.primaryContainer
                             else
                                 MaterialTheme.colorScheme.surfaceVariant
@@ -63,27 +68,22 @@ fun AchievementsScreen(viewModel: AchievementViewModel = viewModel()) {
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                achievement.icon,
-                                style = MaterialTheme.typography.headlineMedium
-                            )
+                            // Эмодзи-иконка достижения.
+                            Text(a.icon, style = MaterialTheme.typography.headlineMedium)
                             Spacer(Modifier.width(12.dp))
+
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    achievement.title,
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                                Text(a.title, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(4.dp))
-                                Text(
-                                    achievement.description,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                                Text(a.description)
                             }
+
+                            // Метка в правой части карточки.
                             Text(
-                                if (achievement.isUnlocked) "✅ Получено" else "🔒 Не получено",
+                                if (a.isUnlocked) "✅ Получено" else "🔒 Не получено",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (achievement.isUnlocked) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (a.isUnlocked) Color(0xFF2E7D32)
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

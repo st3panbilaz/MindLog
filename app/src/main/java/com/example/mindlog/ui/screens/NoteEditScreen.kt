@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.example.mindlog.data.NoteEntity
 import com.example.mindlog.viewmodel.NoteViewModel
 
+/**
+ * Универсальный экран заметки: создание (noteId = -1) и редактирование (noteId > 0).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
@@ -22,6 +25,7 @@ fun NoteEditScreen(
     var content by remember { mutableStateOf("") }
     var loaded by remember { mutableStateOf(false) }
 
+    // Если редактируем — загружаем данные один раз при появлении экрана.
     LaunchedEffect(noteId) {
         if (noteId > 0) {
             val note = viewModel.getNoteById(noteId)

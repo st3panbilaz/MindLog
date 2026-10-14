@@ -15,17 +15,21 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Экран дневника эмоций.
+ * Вверху — три кнопки с эмодзи, снизу — история записей.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
 
     val moods by viewModel.moods.collectAsState()
+
+    // Необязательная заметка, которую можно добавить к эмоции.
     var note by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Дневник эмоций") })
-        }
+        topBar = { TopAppBar(title = { Text("Дневник эмоций") }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -35,12 +39,13 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
         ) {
             Text(
                 "Как ты себя чувствуешь сегодня?",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(Modifier.height(12.dp))
 
+            // Три кнопки для выбора настроения.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -61,6 +66,7 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
 
             Spacer(Modifier.height(12.dp))
 
+            // Поле для необязательной записи.
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
@@ -69,21 +75,17 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
             )
 
             Spacer(Modifier.height(16.dp))
-
-            Text(
-                "История эмоций",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text("История эмоций", fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
 
             if (moods.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Записей пока нет", style = MaterialTheme.typography.bodyLarge)
+                    Text("Записей пока нет")
                 }
             } else {
                 LazyColumn(
@@ -91,13 +93,18 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(moods) { mood ->
+                        // Преобразуем код настроения в читаемый текст с эмодзи.
                         val emoji = when (mood.mood) {
                             "happy" -> "😊 Счастлив"
                             "normal" -> "😐 Нормально"
                             "sad" -> "😢 Грустно"
                             else -> mood.mood
                         }
-                        val date = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(mood.timestamp))
+                        // Форматируем дату в привычный вид.
+                        val date = SimpleDateFormat(
+                            "dd.MM.yyyy HH:mm",
+                            Locale.getDefault()
+                        ).format(Date(mood.timestamp))
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -106,9 +113,13 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text(emoji, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(4.dp))
-                                Text(mood.note, style = MaterialTheme.typography.bodyMedium)
+                                Text(mood.note)
                                 Spacer(Modifier.height(4.dp))
-                                Text(date, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    date,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
@@ -118,6 +129,9 @@ fun MoodScreen(viewModel: MoodViewModel = viewModel()) {
     }
 }
 
+/**
+ * Кнопка эмоции: большая кнопка с эмодзи и подписью снизу.
+ */
 @Composable
 fun MoodButton(emoji: String, label: String, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {

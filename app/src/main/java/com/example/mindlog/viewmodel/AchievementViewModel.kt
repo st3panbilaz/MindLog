@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel достижений. При первом запуске инициализирует список,
+ * потом при каждом заходе на экран проверяет условия разблокировки.
+ */
 class AchievementViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: AchievementRepository
@@ -21,13 +25,14 @@ class AchievementViewModel(application: Application) : AndroidViewModel(applicat
     private val _achievements = MutableStateFlow<List<AchievementEntity>>(emptyList())
     val achievements: StateFlow<List<AchievementEntity>> = _achievements
 
-    // Счётчик уведомлений, чтобы у каждой было уникальное id
+    // Счётчик для уникальных id уведомлений, иначе новые будут перезаписывать старые.
     private var notificationId = 1
 
     init {
         val db = AppDatabase.getInstance(application)
         repository = AchievementRepository(db.achievementDao())
         viewModelScope.launch {
+            // Если база пустая — создаём стартовый набор достижений.
             if (repository.getAllAchievements().isEmpty()) {
                 initAchievements()
             }
@@ -51,6 +56,10 @@ class AchievementViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /**
+     * Проверяем все достижения: если условие выполнено и оно ещё не разблокировано —
+     * обновляем и отправляем уведомление.
+     */
     fun checkAchievements() {
         viewModelScope.launch {
             val all = repository.getAllAchievements()
@@ -69,9 +78,7 @@ class AchievementViewModel(application: Application) : AndroidViewModel(applicat
                     else -> false
                 }
                 if (shouldUnlock && !a.isUnlocked) {
-                    // Разблокируем достижение
                     repository.update(a.copy(isUnlocked = true))
-                    // Отправляем уведомление
                     sendAchievementNotification(a)
                 }
             }
@@ -79,6 +86,7 @@ class AchievementViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    // Отправляем системное уведомление о новом достижении.
     private fun sendAchievementNotification(achievement: AchievementEntity) {
         val context = getApplication<Application>()
 

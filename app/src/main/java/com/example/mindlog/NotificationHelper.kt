@@ -5,6 +5,10 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 
+/**
+ * Хелпер для создания канала уведомлений.
+ * На Android 8.0+ каналы обязательны, иначе уведомления не показываются.
+ */
 object NotificationHelper {
 
     const val CHANNEL_ID = "achievements_channel"
